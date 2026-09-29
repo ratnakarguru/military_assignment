@@ -48,23 +48,26 @@ function Purchase() {
   }
 })();
 
-  const role = String(currentUser?.user_role || "");
-  const serviceId = currentUser?.service_id || "";
-  const userBaseId = Number(currentUser?.base || 0);
-  const isAdmin = role === "1";
-  const isBaseCommander = role === "BC001";
-  const isLogisticsOfficer = role === "LO001";
+  const role = String(currentUser?.user_role ?? currentUser?.role_id ?? "")
+    .trim()
+    .toUpperCase();
+  const userBaseId = Number(currentUser?.base ?? currentUser?.base_id ?? 0);
+  const isAdmin = role === "1" || role === "ADMIN";
+  const isBaseCommander = role === "2" || role === "BC001" || role === "BASE COMMANDER";
+  const isLogisticsOfficer = role === "3" || role === "LO001" || role === "LOGISTICS OFFICER";
   const visibleBases = bases.filter((base) => {
-  if (isAdmin) return true;
+    if (isAdmin || isLogisticsOfficer) return true;
+    if (!isBaseCommander) return false;
 
-  return Number(base.id) === userBaseId;
-});
+    return Number(base.id) === userBaseId;
+  });
 
   const visiblePurchases = purchases.filter((purchase) => {
-  if (isAdmin) return true;
+    if (isAdmin || isLogisticsOfficer) return true;
+    if (!isBaseCommander) return false;
 
-  return Number(purchase.baseId) === userBaseId;
-});
+    return Number(purchase.baseId) === userBaseId;
+  });
 
   const [formData, setFormData] = useState({
     asset: "",
@@ -205,10 +208,11 @@ function Purchase() {
       <div className="purchase-page">
 
         {/* PAGE HEADER */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <br />
+        <div className="purchase-page-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
           <div>
-            <h3 className="fw-bold mb-1">
-              <i className="bi bi-cart-check me-2"></i>
+            <h3 className="purchase-page-title fw-bold mb-1">
+              <i className="bi bi-cart-check" aria-hidden="true"></i>
               Purchase Management
             </h3>
 
@@ -219,10 +223,10 @@ function Purchase() {
 
           <Button
             variant="primary"
-            className="px-4"
+            className="purchase-primary-action px-4"
             onClick={() => setShowModal(true)}
           >
-            <i className="bi bi-plus-lg me-2"></i>
+            <i className="bi bi-plus-lg" aria-hidden="true"></i>
             New Purchase Request
           </Button>
         </div>
@@ -230,13 +234,13 @@ function Purchase() {
         {error && <Alert variant="danger" dismissible onClose={() => setError("")}>{error}</Alert>}
 
         {/* SUMMARY CARDS */}
-        <Row className="g-3 mb-4">
+        <Row className="purchase-summary g-3 mb-4">
 
-        <Col md={3}>
+        <Col xs={12} sm={6} xl={3}>
           <Card className="border-0 shadow-sm h-100">
             <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
+              <div className="purchase-stat d-flex justify-content-between align-items-center">
+                <div className="purchase-stat-content">
                   <small className="text-muted">
                     Total Requests
                   </small>
@@ -254,11 +258,11 @@ function Purchase() {
           </Card>
         </Col>
 
-        <Col md={3}>
+        <Col xs={12} sm={6} xl={3}>
           <Card className="border-0 shadow-sm h-100">
             <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
+              <div className="purchase-stat d-flex justify-content-between align-items-center">
+                <div className="purchase-stat-content">
                   <small className="text-muted">
                     Pending
                   </small>
@@ -276,11 +280,11 @@ function Purchase() {
           </Card>
         </Col>
 
-        <Col md={3}>
+        <Col xs={12} sm={6} xl={3}>
           <Card className="border-0 shadow-sm h-100">
             <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
+              <div className="purchase-stat d-flex justify-content-between align-items-center">
+                <div className="purchase-stat-content">
                   <small className="text-muted">
                     Approved
                   </small>
@@ -298,11 +302,11 @@ function Purchase() {
           </Card>
         </Col>
 
-        <Col md={3}>
+        <Col xs={12} sm={6} xl={3}>
           <Card className="border-0 shadow-sm h-100">
             <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
+              <div className="purchase-stat d-flex justify-content-between align-items-center">
+                <div className="purchase-stat-content">
                   <small className="text-muted">
                     Procurement Value
                   </small>
@@ -323,11 +327,11 @@ function Purchase() {
       </Row>
 
       {/* PURCHASE TABLE */}
-      <Card className="border-0 shadow-sm">
+      <Card className="purchase-list-card border-0 shadow-sm">
 
         <Card.Body>
 
-          <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="purchase-table-toolbar d-flex justify-content-between align-items-center gap-3 mb-3">
 
             <div>
               <h5 className="fw-bold mb-1">
@@ -339,7 +343,7 @@ function Purchase() {
               </small>
             </div>
 
-            <InputGroup style={{ width: "300px" }}>
+            <InputGroup className="purchase-search">
               <InputGroup.Text>
                 <i className="bi bi-search"></i>
               </InputGroup.Text>
@@ -355,7 +359,7 @@ function Purchase() {
 
           <div className="table-responsive">
 
-            <Table hover className="align-middle mb-0">
+            <Table hover className="purchase-table align-middle mb-0">
 
               <thead className="table-light">
                 <tr>
@@ -367,7 +371,7 @@ function Purchase() {
                   <th>Total Value</th>
                   <th>Date</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th className="text-center">Action</th>
                 </tr>
               </thead>
 
@@ -429,11 +433,13 @@ function Purchase() {
                         </Badge>
                       </td>
 
-                      <td>
+                      <td className="text-center">
                         <Button
                           variant="light"
                           size="sm"
+                          className="purchase-view-button"
                           title="View details"
+                          aria-label={`View purchase ${purchase.id}`}
                         >
                           <i className="bi bi-eye"></i>
                         </Button>
@@ -472,8 +478,8 @@ function Purchase() {
       >
 
         <Modal.Header closeButton>
-          <Modal.Title className="fw-bold">
-            <i className="bi bi-cart-plus me-2"></i>
+          <Modal.Title className="purchase-modal-title fw-bold">
+            <i className="bi bi-cart-plus" aria-hidden="true"></i>
             New Purchase Request
           </Modal.Title>
         </Modal.Header>

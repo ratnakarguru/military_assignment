@@ -134,12 +134,23 @@ export default function Dashboard() {
     }
   });
 
-  const role = Number(currentUser?.user_role ?? currentUser?.role_id);
-  const userBaseId = Number(currentUser?.base_id);
+  // const role = Number(currentUser?.user_role ?? currentUser?.role_id);
+  // const userBaseId = Number(currentUser?.base_id);
 
-  const isAdmin = role === 1;
-  const isBaseCommander = role === 2;
-  const isLogisticsOfficer = role === 3;
+  // const isAdmin = role === 1;
+  // const isBaseCommander = role === 2;
+  // const isLogisticsOfficer = role === 3;
+  const role = String(currentUser?.user_role || "");
+
+const userBaseId = Number(
+  currentUser?.base ??
+  currentUser?.base_id ??
+  0
+);
+
+const isAdmin = role === "1";
+const isBaseCommander = role === "BC001";
+const isLogisticsOfficer = role === "LO001";
 
   const [showMovementModal, setShowMovementModal] =
     useState(false);
