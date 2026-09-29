@@ -196,13 +196,14 @@ class Transfer(Base):
 
     status = Column(
         Enum(
-            "Pending",
-            "Approved",
-            "In Transit",
-            "Completed",
-            "Cancelled"
+            "Available",
+            "Assigned",
+            "Maintenance",
+            "Inactive",
+            name="asset_status_enum",
+            native_enum=False
         ),
-        default="Pending"
+        default="Available"
     )
 
     reason = Column(Text)
