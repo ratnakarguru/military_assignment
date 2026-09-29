@@ -58,7 +58,9 @@ class Asset(Base):
             "Available",
             "Assigned",
             "Maintenance",
-            "Inactive"
+            "Inactive",
+            name="asset_status_enum",
+            native_enum=False
         ),
         default="Available"
     )
@@ -118,7 +120,9 @@ class Purchase(Base):
             "Low",
             "Medium",
             "High",
-            "Critical"
+            "Critical",
+            name="purchase_priority_enum",
+            native_enum=False
         ),
         default="Medium"
     )
@@ -128,7 +132,9 @@ class Purchase(Base):
             "Pending",
             "Approved",
             "Rejected",
-            "Received"
+            "Received",
+            name="purchase_status_enum",
+            native_enum=False
         ),
         default="Pending"
     )
@@ -189,21 +195,24 @@ class Transfer(Base):
             "Low",
             "Medium",
             "High",
-            "Critical"
+            "Critical",
+            name="transfer_priority_enum",
+            native_enum=False
         ),
         default="Medium"
     )
 
     status = Column(
         Enum(
-            "Available",
-            "Assigned",
-            "Maintenance",
-            "Inactive",
-            name="asset_status_enum",
+            "Pending",
+            "Approved",
+            "In Transit",
+            "Completed",
+            "Cancelled",
+            name="transfer_status_enum",
             native_enum=False
         ),
-        default="Available"
+        default="Pending"
     )
 
     reason = Column(Text)
@@ -274,7 +283,9 @@ class Assignment(Base):
             "Active",
             "Returned",
             "Lost",
-            "Damaged"
+            "Damaged",
+            name="assignment_status_enum",
+            native_enum=False
         ),
         default="Active"
     )
@@ -332,7 +343,9 @@ class Expenditure(Base):
         Enum(
             "Recorded",
             "Approved",
-            "Cancelled"
+            "Cancelled",
+            name="expenditure_status_enum",
+            native_enum=False
         ),
         default="Recorded"
     )
@@ -413,7 +426,12 @@ class BaseLocation(Base):
     base_name = Column(String(100), nullable=False)
     location = Column(String(150))
     status = Column(
-        Enum("Active", "Inactive"),
+        Enum(
+            "Active",
+            "Inactive",
+            name="base_status_enum",
+            native_enum=False
+        ),
         default="Active"
     )
     created_at = Column(
