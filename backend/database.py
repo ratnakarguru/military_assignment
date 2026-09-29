@@ -12,13 +12,38 @@ load_dotenv(BASE_DIR / ".env")
 # Supports either a single DATABASE_URL or separate DB_* variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
+# if not DATABASE_URL:
+#     DB_USER = os.getenv("DB_USER", "root")
+#     DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD", ""))
+#     DB_HOST = os.getenv("DB_HOST", "localhost")
+#     DB_PORT = os.getenv("DB_PORT", "3306")
+#     DB_NAME = os.getenv("DB_NAME")
+#     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    # PostgreSQL / Neon
+    if DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace(
+            "postgresql://",
+            "postgresql+psycopg://",
+            1
+        )
+
+else:
+    # MySQL fallback for local development
     DB_USER = os.getenv("DB_USER", "root")
     DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD", ""))
     DB_HOST = os.getenv("DB_HOST", "localhost")
     DB_PORT = os.getenv("DB_PORT", "3306")
     DB_NAME = os.getenv("DB_NAME")
-    DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+    DATABASE_URL = (
+        f"mysql+pymysql://"
+        f"{DB_USER}:{DB_PASSWORD}@"
+        f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
 
 # pool_pre_ping=True prevents MySQL "server has gone away" timeout errors
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
