@@ -6,7 +6,7 @@ import {
   Navigate,
   useNavigate,
 } from "react-router-dom";
-
+import "./App.css";
 
 import Login from "./components/login";
 import Dashboard from "./pages/dashboard";
