@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class LoginRequest(BaseModel):
     service_id: str
@@ -35,7 +35,7 @@ class PurchaseCreate(BaseModel):
     purchase_date: date
     priority: str = "Medium"
     remarks: Optional[str] = None
-    created_by: int
+    
 
 class TransferCreate(BaseModel):
     asset_id: int
@@ -45,25 +45,25 @@ class TransferCreate(BaseModel):
     transfer_date: date
     priority: str = "Medium"
     reason: Optional[str] = None
-    requested_by: int
 
 class AssignmentCreate(BaseModel):
     asset_id: int
     personnel_name: str
     personnel_service_id: Optional[str] = None
     base_id: int
-    quantity: int
+    quantity: int = Field(gt=0)
     assigned_date: date
     expected_return_date: Optional[date] = None
     remarks: Optional[str] = None
-    assigned_by: int
+    assigned_by: Optional[int] = None    # ignored; server uses the token's user
+
 
 class ExpenditureCreate(BaseModel):
     asset_id: int
     base_id: int
-    quantity: int
+    quantity: int = Field(gt=0)
     purpose: Optional[str] = None
     personnel_name: Optional[str] = None
     expenditure_date: date
     remarks: Optional[str] = None
-    recorded_by: int
+    recorded_by: Optional[int] = None 

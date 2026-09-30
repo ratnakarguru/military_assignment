@@ -5,6 +5,7 @@ anyio==4.15.1
 argon2-cffi==25.1.0
 argon2-cffi-bindings==26.1.0
 arrow==1.4.0
+bcrypt==5.0.0
 certifi==2026.7.22
 cffi==2.1.1
 charset-normalizer==3.5.1
@@ -39,6 +40,7 @@ pydantic-settings==2.15.0
 pydantic_core==2.46.5
 pyfsense-client==0.5.0
 Pygments==2.21.0
+PyJWT==2.15.1
 PyMySQL==1.2.3
 python-dateutil==2.9.0.post0
 python-decouple==3.8

@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, func, DECIMAL, Date, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, DECIMAL, Date, Text, BigInteger
+from sqlalchemy.sql import func
 from database import Base
 from datetime import date
 from decimal import Decimal
@@ -460,3 +461,16 @@ class EquipmentType(Base):
     )
 
     description = Column(String(255))
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=True)
+    action = Column(String(100), nullable=False)
+    entity_type = Column(String(100), nullable=True)
+    entity_id = Column(Integer, nullable=True)
+    description = Column(Text, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    detail = Column(String(255), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())

@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   Navbar,
   Container,
@@ -8,10 +9,43 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Header({
-  title = "Good morning",
   subtitle = "Here's what's happening with your assets today.",
 }) {
   const navigate = useNavigate();
+
+  // Current time
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Dynamic greeting
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+
+    if (hour < 12) {
+      return "Good morning";
+    }
+
+    if (hour < 18) {
+      return "Good afternoon";
+    }
+
+    return "Good evening";
+  };
+
+  // Format current time
+  const formattedTime = currentTime.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
   // Get logged-in user
   let user = null;
@@ -26,19 +60,23 @@ export default function Header({
   const username = user?.username || "User";
   const serviceId = user?.service_id || "";
 
+  // Role mapping based on your database
+  const rawRole = String(user?.user_role || "");
+
   const role =
     user?.role_name ||
-    (Number(user?.user_role) === 1
+    (rawRole === "1"
       ? "Administrator"
-      : Number(user?.user_role) === 2
+      : rawRole === "BC001"
       ? "Base Commander"
-      : Number(user?.user_role) === 3
+      : rawRole === "LO001"
       ? "Logistics Officer"
       : "User");
 
   // Logout
   const handleLogout = () => {
     localStorage.removeItem("mams_user");
+    localStorage.removeItem("access_token");
     navigate("/");
   };
 
@@ -48,9 +86,19 @@ export default function Header({
 
         {/* Page heading */}
         <div>
-          <h1 className="mams-header-title">
-            {title}
-          </h1>
+          <div className="d-flex align-items-center gap-3 flex-wrap">
+
+            <h1 className="mams-header-title mb-0">
+              {getGreeting()}, {username}
+            </h1>
+
+            {/* Realtime Clock */}
+            <span className="badge bg-light text-dark border px-3 py-2">
+              <i className="bi bi-clock me-2"></i>
+              {formattedTime}
+            </span>
+
+          </div>
 
           <p className="mams-header-subtitle">
             {subtitle}
@@ -82,6 +130,7 @@ export default function Header({
               className="mams-profile-button"
               id="profile-dropdown"
             >
+
               {/* Avatar */}
               <div className="mams-avatar">
                 <i className="bi bi-person-fill"></i>
@@ -99,6 +148,7 @@ export default function Header({
                 </div>
 
               </div>
+
             </Dropdown.Toggle>
 
             <Dropdown.Menu>

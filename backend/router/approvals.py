@@ -17,25 +17,13 @@ router = APIRouter(
     tags=["Approvals"]
 )
 
-
-# =========================================================
-# GET ALL APPROVAL REQUESTS
-# =========================================================
-
 @router.get("/")
 def get_approvals(db: Session = Depends(get_db)):
 
     approvals = []
 
-    # -----------------------------------------------------
-    # PURCHASES
-    # -----------------------------------------------------
-
     purchases = (
-        db.query(Purchase)
-        .filter(Purchase.status == "Pending")
-        .order_by(Purchase.created_at.desc())
-        .all()
+        db.query(Purchase).filter(Purchase.status == "Pending").order_by(Purchase.created_at.desc()).all()
     )
 
     for purchase in purchases:
@@ -44,15 +32,11 @@ def get_approvals(db: Session = Depends(get_db)):
 
         if purchase.created_by:
             user = (
-                db.query(User)
-                .filter(User.id == purchase.created_by)
-                .first()
+                db.query(User).filter(User.id == purchase.created_by).first()
             )
 
         base = (
-    db.query(BaseLocation)
-    .filter(BaseLocation.id == purchase.base_id)
-    .first()
+    db.query(BaseLocation).filter(BaseLocation.id == purchase.base_id).first()
 )
 
         approvals.append({
@@ -60,10 +44,8 @@ def get_approvals(db: Session = Depends(get_db)):
             "request_id": purchase.id,
             "request_number": purchase.purchase_number,
             "type": "Purchase",
-
             "base_id": purchase.base_id,
             "base_name": base.base_name if base else "Unknown",
-
             "requested_by": purchase.created_by,
             "requested_by_name": (
                 user.username if user else "Unknown"
@@ -71,25 +53,17 @@ def get_approvals(db: Session = Depends(get_db)):
 
             "asset_name": purchase.asset_name,
             "quantity": purchase.quantity,
-
             "date": str(purchase.purchase_date)
             if purchase.purchase_date else None,
-
             "priority": purchase.priority,
             "reason": purchase.remarks or "",
-
             "status": purchase.status,
-
             "created_at": (
                 purchase.created_at.isoformat()
                 if purchase.created_at
                 else None
             ),
         })
-
-    # -----------------------------------------------------
-    # TRANSFERS
-    # -----------------------------------------------------
 
     transfers = (
         db.query(Transfer)
@@ -101,7 +75,6 @@ def get_approvals(db: Session = Depends(get_db)):
     for transfer in transfers:
 
         user = None
-
         if transfer.requested_by:
             user = (
                 db.query(User)
@@ -126,9 +99,7 @@ def get_approvals(db: Session = Depends(get_db)):
             "request_id": transfer.id,
             "request_number": transfer.transfer_number,
             "type": "Transfer",
-
             "base_id": transfer.from_base_id,
-
             "base_name": (
                 f"{from_base.base_name if from_base else 'Unknown'}"
                 f" → "
@@ -136,32 +107,23 @@ def get_approvals(db: Session = Depends(get_db)):
             ),
 
             "requested_by": transfer.requested_by,
-
             "requested_by_name": (
                 user.username if user else "Unknown"
             ),
 
             "asset_id": transfer.asset_id,
             "quantity": transfer.quantity,
-
             "date": str(transfer.transfer_date)
             if transfer.transfer_date else None,
-
             "priority": transfer.priority,
             "reason": transfer.reason or "",
-
             "status": transfer.status,
-
             "created_at": (
                 transfer.created_at.isoformat()
                 if transfer.created_at
                 else None
             ),
         })
-
-    # -----------------------------------------------------
-    # ASSIGNMENTS
-    # -----------------------------------------------------
 
     assignments = (
         db.query(Assignment)
@@ -192,40 +154,29 @@ def get_approvals(db: Session = Depends(get_db)):
             "request_id": assignment.id,
             "request_number": assignment.assignment_number,
             "type": "Assignment",
-
             "base_id": assignment.base_id,
-
             "base_name": (
                 base.base_name if base else "Unknown"
             ),
 
             "requested_by": assignment.assigned_by,
-
             "requested_by_name": (
                 user.username if user else "Unknown"
             ),
 
             "personnel_name": assignment.personnel_name,
             "quantity": assignment.quantity,
-
             "date": str(assignment.assigned_date)
             if assignment.assigned_date else None,
-
             "priority": None,
             "reason": assignment.remarks or "",
-
             "status": assignment.status,
-
             "created_at": (
                 assignment.created_at.isoformat()
                 if assignment.created_at
                 else None
             ),
         })
-
-    # -----------------------------------------------------
-    # EXPENDITURES
-    # -----------------------------------------------------
 
     expenditures = (
         db.query(Expenditure)
@@ -270,15 +221,12 @@ def get_approvals(db: Session = Depends(get_db)):
             ),
 
             "quantity": expenditure.quantity,
-
             "date": str(expenditure.expenditure_date)
             if expenditure.expenditure_date else None,
 
             "priority": None,
             "reason": expenditure.purpose or "",
-
             "status": expenditure.status,
-
             "created_at": (
                 expenditure.created_at.isoformat()
                 if expenditure.created_at
@@ -286,21 +234,13 @@ def get_approvals(db: Session = Depends(get_db)):
             ),
         })
 
-    # -----------------------------------------------------
     # SORT ALL REQUESTS BY DATE
-    # -----------------------------------------------------
-
     approvals.sort(
         key=lambda x: x["created_at"] or "",
         reverse=True
     )
 
     return approvals
-
-
-# =========================================================
-# APPROVE / REJECT REQUEST
-# =========================================================
 
 @router.patch("/{request_type}/{request_id}")
 def update_approval(

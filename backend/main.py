@@ -17,7 +17,8 @@ from router import (
     transfers,
     assignments,
     expandtures,
-    approvals
+    approvals,
+    audit
 )
 
 # Create database tables
@@ -53,6 +54,7 @@ app.include_router(transfers.router, prefix="/api/v1")
 app.include_router(assignments.router, prefix="/api/v1")
 app.include_router(expandtures.router, prefix="/api/v1")
 app.include_router(approvals.router, prefix="/api/v1")
+app.include_router(audit.router, prefix="/api/v1")
 
 
 @app.get("/")

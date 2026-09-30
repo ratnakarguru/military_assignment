@@ -9,7 +9,7 @@ import {
   Spinner,
   InputGroup,
 } from "react-bootstrap";
-import { apiRequest } from "../api";
+import { apiRequest, saveSession } from "../api";
 
 const styles = `
   .mams-login-page {
@@ -388,9 +388,10 @@ export default function Login({ onLogin }) {
         },
       });
 
-      if (data.user) {
-        localStorage.setItem("mams_user", JSON.stringify(data.user));
-      }
+      if (!data.access_token) {
+  throw new Error("Server did not return a token. Check the backend login code.");
+}
+saveSession(data);
 
       if (onLogin) {
         await onLogin(data);
@@ -427,7 +428,7 @@ export default function Login({ onLogin }) {
 
             <div className="mams-login-brand">
               <div className="mams-login-emblem">
-                <i className="bi bi-stars"></i>
+                <img src="/152.png" style={{ width: "120px", height: "120px", objectFit: "contain" }}alt="MAMS Logo" />
               </div>
 
               <div>

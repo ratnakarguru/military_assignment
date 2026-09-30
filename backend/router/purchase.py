@@ -1,58 +1,78 @@
+from datetime import date
+from enum import Enum
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Purchase, Asset
+from models import Purchase, AuditLog
 from schemas import PurchaseCreate
+from security import require_roles  # decodes JWT, checks role, returns user
+import uuid
+
+router = APIRouter(prefix="/purchases", tags=["Purchases"])
 
 
-router = APIRouter(
-    prefix="/purchases",
-    tags=["Purchases"]
-)
+class PurchaseStatus(str, Enum):
+    Pending = "Pending"
+    Approved = "Approved"
+    Ordered = "Ordered"
+    Rejected = "Rejected"
+
+
+class StatusUpdate(BaseModel):
+    status: PurchaseStatus
+
+
+def log_action(db, user, action, detail):
+    db.add(AuditLog(user_id=user.id, action=action, detail=detail))
 
 
 @router.get("/")
 def get_purchases(
-    db: Session = Depends(get_db)
+    base_id: Optional[int] = None,
+    equipment_type_id: Optional[int] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("ADMIN", "COMMANDER", "LOGISTICS")),
 ):
-    return (
-        db.query(Purchase)
-        .order_by(Purchase.id.desc())
-        .all()
-    )
+    q = db.query(Purchase)
+
+    # base scoping: commander always sees only own base
+    if user.role == "COMMANDER":
+        q = q.filter(Purchase.base_id == user.base_id)
+    elif base_id:
+        q = q.filter(Purchase.base_id == base_id)
+
+    if equipment_type_id:
+        q = q.filter(Purchase.equipment_type_id == equipment_type_id)
+    if date_from:
+        q = q.filter(Purchase.purchase_date >= date_from)
+    if date_to:
+        q = q.filter(Purchase.purchase_date <= date_to)
+
+    return q.order_by(Purchase.id.desc()).offset(skip).limit(limit).all()
 
 
-@router.get("/{purchase_id}")
-def get_purchase(
-    purchase_id: int,
-    db: Session = Depends(get_db)
-):
-
-    purchase = (
-        db.query(Purchase)
-        .filter(Purchase.id == purchase_id)
-        .first()
-    )
-
-    if not purchase:
-        raise HTTPException(
-            status_code=404,
-            detail="Purchase not found"
-        )
-
-    return purchase
-
-
-@router.post("/")
+@router.post("/", status_code=201)
 def create_purchase(
     data: PurchaseCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("ADMIN", "COMMANDER", "LOGISTICS")),
 ):
+    if user.role in ["COMMANDER", "LOGISTICS"]:
+        if data.base_id != user.base_id:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only purchase for your own base"
+            )
 
-    purchase_number = (
-        f"PUR-{1000 + db.query(Purchase).count() + 1}"
-    )
+    purchase_number = f"PUR-{uuid.uuid4().hex[:8].upper()}"
 
     purchase = Purchase(
         purchase_number=purchase_number,
@@ -66,12 +86,30 @@ def create_purchase(
         priority=data.priority,
         status="Pending",
         remarks=data.remarks,
-        created_by=data.created_by
+        created_by=user.id,
     )
 
     db.add(purchase)
-    db.commit()
-    db.refresh(purchase)
+
+    try:
+        db.flush()
+
+        log_action(
+            db,
+            user,
+            "CREATE_PURCHASE",
+            f"{purchase.purchase_number} qty={data.quantity}"
+        )
+
+        db.commit()
+        db.refresh(purchase)
+
+    except Exception as error:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to create purchase: {str(error)}"
+        )
 
     return purchase
 
@@ -79,25 +117,19 @@ def create_purchase(
 @router.patch("/{purchase_id}/status")
 def update_purchase_status(
     purchase_id: int,
-    status: str,
-    db: Session = Depends(get_db)
+    body: StatusUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("ADMIN", "COMMANDER")),
 ):
-
-    purchase = (
-        db.query(Purchase)
-        .filter(Purchase.id == purchase_id)
-        .first()
-    )
-
+    purchase = db.query(Purchase).filter(Purchase.id == purchase_id).first()
     if not purchase:
-        raise HTTPException(
-            status_code=404,
-            detail="Purchase not found"
-        )
+        raise HTTPException(404, "Purchase not found")
+    if user.role == "COMMANDER" and purchase.base_id != user.base_id:
+        raise HTTPException(403, "Not your base")
 
-    purchase.status = status
-
+    old = purchase.status
+    purchase.status = body.status.value
+    log_action(db, user, "UPDATE_PURCHASE_STATUS", f"{purchase.purchase_number}: {old} -> {body.status.value}")
     db.commit()
     db.refresh(purchase)
-
     return purchase

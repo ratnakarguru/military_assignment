@@ -16,6 +16,7 @@ import Transfer from "./pages/transfer";
 import Profile from "./pages/profile";
 import Settings from "./pages/setting";
 import Approvals from "./pages/approve";
+import AuditLogs from "./pages/auditlog";
 import AssignmentsExpenditures from "./pages/assignments";
 
 function LoginWrapper() {
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="*" element={<NotFound />} />
         {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
       </Routes>
