@@ -101,7 +101,7 @@ export default function Sidebar() {
       <div className="mams-brand">
 
         <div className="mams-logo">
-          <img src="/152.png" style={{ width: "120px", height: "120px", objectFit: "contain" }}alt="MAMS Logo" />
+          <img src="/Logo.png" style={{ width: "120px", height: "120px", objectFit: "contain" }}alt="MAMS Logo" />
         </div>
 
         <div>

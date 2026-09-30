@@ -428,7 +428,7 @@ saveSession(data);
 
             <div className="mams-login-brand">
               <div className="mams-login-emblem">
-                <img src="/152.png" style={{ width: "120px", height: "120px", objectFit: "contain" }}alt="MAMS Logo" />
+                <img src="/Logo.png" style={{ width: "120px", height: "120px", objectFit: "contain" }}alt="MAMS Logo" />
               </div>
 
               <div>
