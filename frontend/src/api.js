@@ -1,5 +1,5 @@
-// const API_URL = import.meta.env.VITE_API_URL || "https://military-assignment.onrender.com";
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL || "https://military-assignment.onrender.com";
+// const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const TOKEN_KEY = "mams_token";
 const USER_KEY = "mams_user";
