@@ -3,7 +3,7 @@ import { Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
   const location = useLocation();
 
   // Get logged-in user
@@ -175,6 +175,7 @@ export default function Sidebar() {
               <Nav.Link
                 as={Link}
                 to={item.path}
+                onClick={onClose}
                 className={`mams-nav-link ${
                   active ? "active" : ""
                 }`}
@@ -211,6 +212,7 @@ export default function Sidebar() {
               <Nav.Link
                 as={Link}
                 to="/users"
+                onClick={onClose}
                 className={`mams-nav-link ${
                   location.pathname === "/users"
                     ? "active"
@@ -242,6 +244,7 @@ export default function Sidebar() {
         <Nav.Link
           as={Link}
           to="/profile"
+          onClick={onClose}
           className={`mams-nav-link ${
             location.pathname === "/profile"
               ? "active"
@@ -262,6 +265,7 @@ export default function Sidebar() {
         <Nav.Link
           as={Link}
           to="/settings"
+          onClick={onClose}
           className={`mams-nav-link ${
             location.pathname === "/settings"
               ? "active"

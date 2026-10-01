@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 export default function Header({
   subtitle = "Here's what's happening with your assets today.",
+  onMenuClick,
 }) {
   const navigate = useNavigate();
 
@@ -85,7 +86,16 @@ export default function Header({
       <Container fluid className="px-4 px-lg-5">
 
         {/* Page heading */}
-        <div>
+        <div className="mams-header-copy">
+          <Button
+            variant="light"
+            className="mams-menu-button"
+            type="button"
+            aria-label="Open navigation"
+            onClick={onMenuClick}
+          >
+            <i className="bi bi-list"></i>
+          </Button>
           <div className="d-flex align-items-center gap-3 flex-wrap">
 
             <h1 className="mams-header-title mb-0">
@@ -106,7 +116,7 @@ export default function Header({
         </div>
 
         {/* Right side */}
-        <div className="d-flex align-items-center gap-3">
+        <div className="mams-header-actions d-flex align-items-center gap-3">
 
           {/* Notification */}
           <Button

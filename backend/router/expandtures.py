@@ -108,7 +108,7 @@ def create_expenditure(
         expenditure_date=data.expenditure_date,
         status="Recorded",
         remarks=data.remarks,
-        recorded_by=user.id,              # from token, not from client
+        recorded_by=user.id,              
     )
     db.add(expenditure)
     db.flush()                            # gets the real id

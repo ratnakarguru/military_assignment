@@ -266,8 +266,6 @@ function Purchase() {
       subtitle="Manage asset procurement requests and purchase orders"
     >
       <div className="purchase-page">
-        <br />
-
         {/* PAGE HEADER */}
         <div className="purchase-page-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
           <div>
@@ -492,6 +490,7 @@ function Purchase() {
           onHide={() => setShowModal(false)}
           size="lg"
           centered
+          dialogClassName="purchase-modal-dialog"
         >
           <Modal.Header closeButton>
             <Modal.Title className="purchase-modal-title fw-bold">
@@ -648,7 +647,7 @@ function Purchase() {
               </Row>
             </Modal.Body>
 
-            <Modal.Footer>
+            <Modal.Footer className="purchase-modal-footer">
               <Button variant="light" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
@@ -669,7 +668,7 @@ function Purchase() {
           </Modal.Header>
           {selected && (
             <Modal.Body>
-              <Table borderless size="sm" className="mb-0">
+              <Table borderless size="sm" className="purchase-details-table mb-0">
                 <tbody>
                   <tr>
                     <td className="text-muted">Asset</td>
@@ -728,7 +727,7 @@ function Purchase() {
               </Table>
             </Modal.Body>
           )}
-          <Modal.Footer>
+          <Modal.Footer className="purchase-modal-footer">
             <Button variant="light" onClick={() => setSelected(null)}>
               Close
             </Button>

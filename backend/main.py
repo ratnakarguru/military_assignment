@@ -1,10 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from database import Base, engine
-
-# IMPORTANT:
-# Import models before create_all()
 import models
 
 from router import (

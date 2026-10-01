@@ -51,7 +51,7 @@ def stock_now(db, base_id, type_id) -> int:
 
 
 def movement_totals(db, base_id, type_id, d_from, d_to) -> dict:
-    """Purchases (Received), completed transfers and recorded expenditures."""
+    
     # Purchases
     pq = _sum(db, Purchase.quantity).filter(Purchase.status == "Received")
     if base_id:
@@ -110,7 +110,6 @@ def compute(db, base_id, type_id, d_from, d_to) -> dict:
     in_range = movement_totals(db, base_id, type_id, d_from, d_to)
     since_start = movement_totals(db, base_id, type_id, d_from, None)
 
-    # Opening = stock now, rolled back through everything since the start date
     net_since = (
         since_start["purchases"]
         + since_start["transfer_in"]
